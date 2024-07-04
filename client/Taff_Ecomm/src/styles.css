@@ -1,0 +1,36 @@
+body {
+    background: url('../src/assets/bgimg2.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .login-card {
+    max-width: 400px;
+    margin: 60px auto;
+    margin-top: 100px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.9); /* Adds a white background with some transparency */
+    border-radius: 10px; /* Optional: Adds rounded corners */
+  }
+  
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  
+  button {
+    width: 100%;
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .captcha {
+    margin-bottom: 30px; /* Increased margin-bottom to add space */
+  }
+  
