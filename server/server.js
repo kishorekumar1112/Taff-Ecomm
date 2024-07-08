@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 const app = express();
@@ -24,16 +25,14 @@ function calculateAge(dob) {
 }
 
 async function createEmployee(data) {
-
   try {
-    const requiredFields = ['firstName', 'lastName', 'dob', 'doj', 'location', 'phoneNumber', 'email', 'rolename'];
+    const requiredFields = ['firstName', 'lastName', 'dob', 'location', 'phoneNumber', 'email', 'rolename'];
     
     for (const field of requiredFields) {
       if (!data[field]) {
         throw new Error(`${field} is required`);
       }
     }
-
 
     if (!data.rolename) {
       throw new Error("Role name is required");
@@ -52,6 +51,7 @@ async function createEmployee(data) {
         }
       });
     }
+
     const existingEmployee = await prisma.employee.findUnique({
       where: {
         email: data.email
@@ -63,16 +63,13 @@ async function createEmployee(data) {
     }
     
     const dob = new Date(data.dob);
-    const doj = new Date(data.doj || Date.now());
     const age = calculateAge(dob);
     const today = new Date();
     
-    // Check if DOB is in the future
     if (dob > today) {
       throw new Error("Date of birth cannot be in the future");
     }
 
-  
     if (age < 18) {
       throw new Error("Employee must be at least 18 years old");
     }
@@ -80,8 +77,8 @@ async function createEmployee(data) {
     let baseUsername = `${data.firstName.toLowerCase()}_${data.rolename.toLowerCase()}`;
     let username = baseUsername;
     let suffix = 1;
+    let password = Math.random().toString(36).slice(-8); 
 
-    // Check if the generated username already exists and generate a unique one if necessary
     let existingUsername = await prisma.employee.findUnique({
       where: { username },
     });
@@ -94,11 +91,8 @@ async function createEmployee(data) {
       });
     }
 
-    // Add the generated username to employee data
     data.username = username;
-   
-
-  
+    data.password = bcrypt.hashSync(password, 10);
 
     const newEmployee = await prisma.employee.create({
       data: {
@@ -107,21 +101,29 @@ async function createEmployee(data) {
         dob: dob,
         email: data.email,
         location: data.location,
-        doj: doj,
         phoneNumber: data.phoneNumber,
-        username:data.username,
+        username: data.username,
+        password: data.password,
         roleId: role.id,
-      //   username: "placeholder_username", 
-      //   password: "placeholder_password" 
       }
     });
 
-    return newEmployee;
+    return { newEmployee, plainPassword: password };
   } catch (error) {
     console.error("Error creating employee:", error);
     throw error;
   }
 }
+
+app.post('/create-employee', async (req, res) => {
+  try {
+    const { newEmployee, plainPassword } = await createEmployee(req.body);
+    res.status(201).json({ employee: newEmployee, password: plainPassword });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.post('/create-employee', async (req, res) => {
   try {
@@ -131,6 +133,7 @@ app.post('/create-employee', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 app.get('/create-employee', async (req, res) => {
   try {
     const employees = await prisma.employee.findMany();
