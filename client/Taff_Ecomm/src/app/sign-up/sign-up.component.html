@@ -32,7 +32,7 @@
         <mat-form-field appearance="outline">
           <mat-label>Role</mat-label>
           <mat-select formControlName="role">
-            <mat-option value=""></mat-option>
+            <mat-option value="Admin">admin</mat-option>
             <mat-option value=""></mat-option>
             <mat-option value=""></mat-option>
           </mat-select>
@@ -68,7 +68,7 @@
       <div class="input-group">
         <mat-form-field appearance="outline">
           <mat-label>Date of Birth</mat-label>
-          <input matInput [matDatepicker]="dob" formControlName="dob" />
+          <input matInput [matDatepicker]="dob" formControlName="dob" [max]="maxDate" />
           <mat-datepicker-toggle matSuffix [for]="dob"></mat-datepicker-toggle>
           <mat-datepicker touchUi #dob></mat-datepicker>
           <mat-error *ngIf="signUpForm.get('dob')?.hasError('required')">Date of Birth is required</mat-error>

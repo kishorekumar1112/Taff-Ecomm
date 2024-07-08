@@ -36,7 +36,7 @@
 
 .input-group {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     margin-top: 25px;
 }
 
@@ -47,7 +47,7 @@
 .role-wrapper {
     display: flex;
     justify-content: space-between;
-    gap: 5px;
+    gap: 10px;
 }
 
 .log-in-btn {

@@ -9,6 +9,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class SignUpComponent {
 
   signUpForm: FormGroup;
+  maxDate: Date;
 
   constructor(private fb: FormBuilder) {
     this.signUpForm = this.fb.group({
@@ -26,6 +27,8 @@ export class SignUpComponent {
       // dateOfJoining: [{ value: new Date(), disabled: true }],
       terms: [false, [Validators.requiredTrue]]
     });
+
+    this.maxDate = new Date();
   }
 
   get f() {
