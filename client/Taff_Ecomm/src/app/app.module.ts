@@ -16,7 +16,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { SignUpComponent } from './sign-up/sign-up.component'; // Add this line
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
-
+import { HttpClientModule } from '@angular/common/http';
 @NgModule({
   declarations: [
     AppComponent,
@@ -38,7 +38,8 @@ import { LoginComponent } from './login/login.component';
     MatDatepickerModule,
     MatNativeDateModule,
     RouterModule, // Add this line
-    AppRoutingModule // Add this line
+    AppRoutingModule, // Add this line
+    HttpClientModule
   ],
   providers: [
     provideClientHydration(),

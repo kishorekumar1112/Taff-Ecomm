@@ -2,10 +2,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-
 const prisma = new PrismaClient();
+import cors from 'cors';
+
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 
@@ -108,6 +110,9 @@ async function createEmployee(data) {
       }
     });
 
+    if(newEmployee) {
+      
+    }
     return { newEmployee, plainPassword: password };
   } catch (error) {
     console.error("Error creating employee:", error);
@@ -115,7 +120,7 @@ async function createEmployee(data) {
   }
 }
 
-app.post('/create-employee', async (req, res) => {
+app.post('/create-employee-with-pass', async (req, res) => {
   try {
     const { newEmployee, plainPassword } = await createEmployee(req.body);
     res.status(201).json({ employee: newEmployee, password: plainPassword });
