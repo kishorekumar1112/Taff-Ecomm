@@ -1,0 +1,86 @@
+<div class="main">
+  <div class="sign-up-wrapper">
+    <div class="form-header">
+      <mat-icon class="lock">lock_open</mat-icon>
+      <h1>Register</h1>
+    </div>
+
+    <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+      <div class="input-group">
+        <mat-form-field appearance="outline">
+          <mat-label>First Name</mat-label>
+          <input type="text" matInput formControlName="firstName" />
+          <mat-error *ngIf="signUpForm.get('firstName')?.hasError('required')">First Name is required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Last Name</mat-label>
+          <input type="text" matInput formControlName="lastName" />
+          <mat-error *ngIf="signUpForm.get('lastName')?.hasError('required')">Last Name is required</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div>
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Email Address</mat-label>
+          <input type="email" matInput formControlName="email" />
+          <mat-error *ngIf="signUpForm.get('email')?.hasError('required')">Email is required</mat-error>
+          <mat-error *ngIf="signUpForm.get('email')?.hasError('email')">Invalid email address</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="role-wrapper">
+        <mat-form-field appearance="outline">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            <mat-option value=""></mat-option>
+            <mat-option value=""></mat-option>
+            <mat-option value=""></mat-option>
+          </mat-select>
+          <mat-error *ngIf="signUpForm.get('role')?.hasError('required')">Role is required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Location</mat-label>
+          <input type="text" matInput formControlName="location" />
+          <mat-error *ngIf="signUpForm.get('location')?.hasError('required')">Location is required</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div>
+        <div class="phone-group">
+          <mat-form-field appearance="outline" class="country-code">
+            <mat-label>Country Code</mat-label>
+            <mat-select formControlName="countryCode">
+              <mat-option value="+1">+1 (USA)</mat-option>
+              <mat-option value="+44">+44 (UK)</mat-option>
+              <mat-option value="+91">+91 (India)</mat-option>
+            </mat-select>
+            <mat-error *ngIf="signUpForm.get('countryCode')?.hasError('required')">Country Code is required</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="phone-number">
+            <mat-label>Phone Number</mat-label>
+            <input type="text" matInput formControlName="phoneNumber" />
+            <mat-error *ngIf="signUpForm.get('phoneNumber')?.hasError('required')">Phone Number is required</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+
+      <div class="input-group">
+        <mat-form-field appearance="outline">
+          <mat-label>Date of Birth</mat-label>
+          <input matInput [matDatepicker]="dob" formControlName="dob" />
+          <mat-datepicker-toggle matSuffix [for]="dob"></mat-datepicker-toggle>
+          <mat-datepicker touchUi #dob></mat-datepicker>
+          <mat-error *ngIf="signUpForm.get('dob')?.hasError('required')">Date of Birth is required</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div>
+        <mat-checkbox formControlName="terms">I accept the terms and conditions</mat-checkbox>
+        <mat-error *ngIf="signUpForm.get('terms')?.hasError('required')">You must accept the terms and conditions</mat-error>
+      </div>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="signUpForm.invalid">Register</button>
+    </form>
+  </div>
+</div>
