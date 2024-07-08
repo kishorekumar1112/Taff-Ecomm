@@ -111,7 +111,7 @@ async function createEmployee(data) {
     });
 
     if(newEmployee) {
-      
+
     }
     return { newEmployee, plainPassword: password };
   } catch (error) {
@@ -129,6 +129,36 @@ app.post('/create-employee-with-pass', async (req, res) => {
   }
 });
 
+
+//Login API
+app.post('/login', async(req,res)=>{
+  const {username, password} = req.body;
+
+  try{
+    const user = await prisma.employee.findUnique({
+      where:{
+        username,
+        password,
+      }
+    })
+  
+    //If user not found
+    if(!user){
+      return res.status(404).json({message: "User not found!" })
+    }
+  
+    //compare the password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+  
+    if(!passwordMatch){
+      return res.status(404).json({message: "Invalid password"})
+    }
+    res.status(200).json({ message: "Login successfully..." });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
 
 app.post('/create-employee', async (req, res) => {
   try {
