@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 import cors from 'cors';
+import nodemailer from 'nodemailer';
 
 const app = express();
 
@@ -25,6 +26,34 @@ function calculateAge(dob) {
 
   return age;
 }
+// Create a transporter object using SMTP transport
+const transporter = nodemailer.createTransport({
+  host: 'smtp.example.com', // Replace with your SMTP host
+  port: 587, // Replace with your SMTP port
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.EMAIL, // Replace with your SMTP username
+    pass: process.env.EMAIL_PASSWORD, // Replace with your SMTP password
+  },
+});
+
+//Function to send email
+async function sendEmail(to, subject, text) {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL, // Replace with your "from" address
+      to, // List of receivers
+      subject, // Subject line
+      text, // Plain text body   
+    });
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+}
+
+
+
 
 async function createEmployee(data) {
   try {
@@ -79,7 +108,7 @@ async function createEmployee(data) {
     let baseUsername = `${data.firstName.toLowerCase()}_${data.rolename.toLowerCase()}`;
     let username = baseUsername;
     let suffix = 1;
-    let password = Math.random().toString(36).slice(-8); 
+    let password = `${data.rolename.toLowerCase()}_1234`;
 
     let existingUsername = await prisma.employee.findUnique({
       where: { username },
@@ -111,7 +140,20 @@ async function createEmployee(data) {
     });
 
     if(newEmployee) {
+       // Send email with username and password
+      const emailText = `Hello ${data.firstName},
 
+      Your account has been created successfully. Here are your credentials:
+      
+      Username: ${data.username}
+      Password: ${password}
+      
+      Please change your password after your first login.
+      
+      Best regards,
+      Your Company`;
+      
+            await sendEmail(data.email, 'Your Account Details', emailText);
     }
     return { newEmployee, plainPassword: password };
   } catch (error) {
@@ -120,45 +162,47 @@ async function createEmployee(data) {
   }
 }
 
-app.post('/create-employee-with-pass', async (req, res) => {
-  try {
-    const { newEmployee, plainPassword } = await createEmployee(req.body);
-    res.status(201).json({ employee: newEmployee, password: plainPassword });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// app.post('/create-employee-with-pass', async (req, res) => {
+//   try {
+//     const { newEmployee, plainPassword } = await createEmployee(req.body);
+//     res.status(201).json({ employee: newEmployee, password: plainPassword });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 
 //Login API
-app.post('/login', async(req,res)=>{
-  const {username, password} = req.body;
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
 
-  try{
+  try {
+    // Find user by username
     const user = await prisma.employee.findUnique({
-      where:{
-        username,
-        password,
+      where: {
+        username: username,
       }
-    })
-  
-    //If user not found
-    if(!user){
-      return res.status(404).json({message: "User not found!" })
+    });
+
+    // If user not found
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
     }
-  
-    //compare the password
+
+    // Compare the password
     const passwordMatch = await bcrypt.compare(password, user.password);
-  
-    if(!passwordMatch){
-      return res.status(404).json({message: "Invalid password"})
+
+    if (!passwordMatch) {
+      return res.status(404).json({ message: "Invalid password" });
     }
+
     res.status(200).json({ message: "Login successfully..." });
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-})
+});
+
 
 app.post('/create-employee', async (req, res) => {
   try {
