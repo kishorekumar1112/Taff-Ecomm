@@ -33,4 +33,42 @@ body {
   .captcha {
     margin-bottom: 30px; /* Increased margin-bottom to add space */
   }
+
+  /* Custom styles for success snackbar */
+  .success-snackbar {
+    background-color: #4caf50;
+    color: #fff;
+    font-size: 1.5em; /* Larger text */
+    padding: 20px; /* More padding for bigger view */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px; /* Optional: Adds rounded corners */
+    max-width: 600px; /* Increase width */
+    margin: auto; /* Center align the snackbar */
+  }
+  
+  /* Custom styles for error snackbar */
+  .error-snackbar {
+    background-color: #f44336;
+    color: #fff;
+    font-size: 1.5em; /* Larger text */
+    padding: 20px; /* More padding for bigger view */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px; /* Optional: Adds rounded corners */
+    max-width: 600px; /* Increase width */
+    margin: auto; /* Center align the snackbar */
+  }
+  
+  /* Optional: Customize the button inside the snackbar */
+  .mat-simple-snackbar-action {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  
+  
   
