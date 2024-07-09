@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../services/users.service';
 @Component({
   selector: 'app-sign-up',
@@ -11,7 +12,7 @@ export class SignUpComponent {
   signUpForm: FormGroup;
   maxDate: Date;
 
-  constructor(private fb: FormBuilder, private userService: UserService) {
+  constructor(private fb: FormBuilder, private userService: UserService, private snackBar: MatSnackBar) {
     this.signUpForm = this.fb.group({
       // userId : ['', [Validators.required]],
       firstName: ['', [Validators.required]],
@@ -42,12 +43,22 @@ export class SignUpComponent {
 
       this.userService.registerUser(this.signUpForm.value).subscribe(
         (response: any) => {
-          console.log('User registered successfully!', response);
+          // console.log('User registered successfully!', response);
           // Handle success, e.g., show a success message
+          this.snackBar.open('User registered successfully!', 'Close', {
+            duration: 3000, // duration in milliseconds
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
         },
         (error: any) => {
-          console.error('Error registering user:', error);
+          // console.error('Error registering user:', error);
           // Handle error, e.g., show an error message
+          this.snackBar.open('Error registering user. Please try again.', 'Close', {
+            duration: 3000, // duration in milliseconds
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
         }
       );
     } else {
