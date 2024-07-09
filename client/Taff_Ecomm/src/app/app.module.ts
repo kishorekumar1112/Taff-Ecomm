@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterModule } from '@angular/router'; // Add this line
 import { AppRoutingModule } from './app-routing.module';
 import { SignUpComponent } from './sign-up/sign-up.component'; // Add this line
@@ -37,6 +38,7 @@ import { HttpClientModule } from '@angular/common/http';
     MatCardModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatSnackBarModule,
     RouterModule, // Add this line
     AppRoutingModule, // Add this line
     HttpClientModule
