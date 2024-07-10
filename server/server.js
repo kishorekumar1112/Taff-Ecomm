@@ -5,12 +5,16 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 import cors from 'cors';
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 function calculateAge(dob) {
   const birthDate = new Date(dob);
@@ -28,11 +32,11 @@ function calculateAge(dob) {
 }
 // Create a transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
-  host: 'smtp.example.com', // Replace with your SMTP host
+  host: 'smtp.gmail.com', // Replace with your SMTP host
   port: 587, // Replace with your SMTP port
   secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.EMAIL, // Replace with your SMTP username
+    user:  process.env.EMAIL, // Replace with your SMTP username
     pass: process.env.EMAIL_PASSWORD, // Replace with your SMTP password
   },
 });
@@ -43,7 +47,7 @@ async function sendEmail(to, subject, text) {
     await transporter.sendMail({
       from: process.env.EMAIL, // Replace with your "from" address
       to, // List of receivers
-      subject, // Subject line
+      subject, 
       text, // Plain text body   
     });
     console.log('Email sent successfully');
@@ -108,7 +112,7 @@ async function createEmployee(data) {
     let baseUsername = `${data.firstName.toLowerCase()}_${data.rolename.toLowerCase()}`;
     let username = baseUsername;
     let suffix = 1;
-    let password = `${data.rolename.toLowerCase()}_1234`;
+    // let password = `${data.firstName.toLowerCase()}_1234`;
 
     let existingUsername = await prisma.employee.findUnique({
       where: { username },
@@ -123,6 +127,7 @@ async function createEmployee(data) {
     }
 
     data.username = username;
+    // data.password= password;
     data.password = bcrypt.hashSync(password, 10);
 
     const newEmployee = await prisma.employee.create({
@@ -146,7 +151,7 @@ async function createEmployee(data) {
       Your account has been created successfully. Here are your credentials:
       
       Username: ${data.username}
-      Password: ${password}
+      Password: ${data.firstName.toLowerCase()}_1234
       
       Please change your password after your first login.
       
@@ -173,27 +178,26 @@ async function createEmployee(data) {
 
 
 //Login API
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+app.post('/login', async(req,res)=>{
+  const {username, password} = req.body;
 
-  try {
-    // Find user by username
+  try{
     const user = await prisma.employee.findUnique({
-      where: {
-        username: username,
+      where:{
+        username:username,
       }
-    });
-
-    // If user not found
-    if (!user) {
-      return res.status(404).json({ message: "User not found!" });
+    })
+  
+    //If user not found
+    if(!user){
+      return res.status(404).json({message: "User not found!" })
     }
-
-    // Compare the password
+  
+    //compare the password
     const passwordMatch = await bcrypt.compare(password, user.password);
-
-    if (!passwordMatch) {
-      return res.status(404).json({ message: "Invalid password" });
+  
+    if(!passwordMatch){
+      return res.status(404).json({message: "Invalid password"})
     }
 
     res.status(200).json({ message: "Login successfully..." });
@@ -201,8 +205,7 @@ app.post('/login', async (req, res) => {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
-
+})
 
 app.post('/create-employee', async (req, res) => {
   try {
@@ -220,6 +223,54 @@ app.get('/create-employee', async (req, res) => {
   } catch (error) {
     console.error("Error retrieving employees:", error);
     res.status(500).json({ error: error.message });
+  }
+});
+app.delete('/create-employee/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedEmployee = await prisma.employee.delete({
+      where: { id: parseInt(id, 10) },
+    });
+
+    res.status(200).json({ message: 'Employee deleted successfully', deletedEmployee });
+  } catch (error) {
+    console.error('Error deleting employee:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get employee credentials by ID (username and password only)
+app.get('/employee-credentials/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if the ID is a valid number
+    if (isNaN(parseInt(id, 10))) {
+      return res.status(400).json({ error: 'Invalid ID format' });
+    }
+
+    // Find the employee by ID
+    const employee = await prisma.employee.findUnique({
+      where: {
+        id: parseInt(id, 10),
+      },
+      select: {
+        username: true,
+        password: true
+      }
+    });
+
+    // If employee not found
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    // Return the username and hashed password
+    res.status(200).json({ username: employee.username, password: employee.password });
+  } catch (error) {
+    console.error('Error retrieving employee credentials:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
