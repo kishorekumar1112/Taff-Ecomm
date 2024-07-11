@@ -112,7 +112,7 @@ async function createEmployee(data) {
     let baseUsername = `${data.firstName.toLowerCase()}_${data.rolename.toLowerCase()}`;
     let username = baseUsername;
     let suffix = 1;
-    // let password = `${data.firstName.toLowerCase()}_1234`;
+    let password = `${data.firstName.toLowerCase()}_1234`;
 
     let existingUsername = await prisma.employee.findUnique({
       where: { username },

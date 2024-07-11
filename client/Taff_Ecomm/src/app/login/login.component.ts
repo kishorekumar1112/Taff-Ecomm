@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/users.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -13,7 +14,7 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   UserService: any;
 
-  constructor(private fb: FormBuilder, private router: Router, private userService: UserService) {}
+  constructor(private fb: FormBuilder, private router: Router, private userService: UserService, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -28,13 +29,22 @@ export class LoginComponent implements OnInit {
 
       this.userService.loginUser(this.loginForm.value).subscribe(
         (response: any) => {
-          console.log('Login successfully!', response);
-          this.router.navigate(['/sign-up']);
-          // Handle success, e.g., show a success message
+          this.snackBar.open('Login Successful', 'Close', {
+            duration: 3000,
+            verticalPosition: 'top',
+            horizontalPosition: 'center',
+            panelClass: ['success-snackbar']
+          });
+          this.router.navigate(['/sign-up'])
         },
-      // Handle form submission logic here
-      // console.log(this.loginForm.value);
-       // Navigate to sign-up page
+       (error: any) => {
+        this.snackBar.open('Login Failed!. Invalid Username or Password', 'Close', {
+          duration: 3000, // duration in milliseconds
+          verticalPosition: 'top',
+          horizontalPosition: 'center',
+          panelClass: ['error-snackbar']
+        });
+      }
       );} else {
       // Mark all fields as touched to display validation messages
       this.loginForm.markAllAsTouched();

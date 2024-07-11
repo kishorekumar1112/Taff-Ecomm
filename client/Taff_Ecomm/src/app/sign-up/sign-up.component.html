@@ -33,8 +33,9 @@
           <mat-label>Role</mat-label>
           <mat-select formControlName="rolename">
             <mat-option value="Admin">admin</mat-option>
-            <mat-option value=""></mat-option>
-            <mat-option value=""></mat-option>
+            <mat-option value="Super Admin">super-admin</mat-option>
+            <mat-option value="Manager">manager</mat-option>
+            <mat-option value="Employee">employee</mat-option>
           </mat-select>
           <mat-error *ngIf="signUpForm.get('role')?.hasError('required')">Role is required</mat-error>
         </mat-form-field>

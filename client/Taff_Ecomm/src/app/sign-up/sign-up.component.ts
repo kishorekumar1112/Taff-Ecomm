@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../services/users.service';
+
 @Component({
   selector: 'app-sign-up',
   templateUrl: './sign-up.component.html',
-  styleUrl: './sign-up.component.css'
+  styleUrls: ['./sign-up.component.css']
 })
 export class SignUpComponent {
 
@@ -39,6 +40,18 @@ export class SignUpComponent {
   // Add the onSubmit method
   onSubmit() {
     if (this.signUpForm.valid) {
+      const dob = new Date(this.signUpForm.value.dob);
+      const age = this.calculateAge(dob);
+      
+      if (age < 18) {
+        this.snackBar.open('Employee must be greater than 18 years.', 'Close', {
+          duration: 3000, // duration in milliseconds
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        return; // Prevent form submission
+      }
+
       console.log('Form Submitted!', this.signUpForm.value);
 
       this.userService.registerUser(this.signUpForm.value).subscribe(
@@ -64,5 +77,16 @@ export class SignUpComponent {
     } else {
       console.log('Form is invalid');
     }
+  }
+
+  // Helper method to calculate age
+  calculateAge(dob: Date): number {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age;
   }
 }
