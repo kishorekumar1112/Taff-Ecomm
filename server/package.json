@@ -14,13 +14,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "prisma": "^5.16.1"
+    "prisma": "^5.16.2"
   },
   "dependencies": {
     "@prisma/client": "^5.16.1",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
