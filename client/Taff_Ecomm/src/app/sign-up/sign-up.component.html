@@ -28,6 +28,25 @@
         </mat-form-field>
       </div>
 
+      <div class="sent">
+        <button type="button" mat-raised-button color="primary" (click)="sendOtp()" [disabled]="!email?.valid">Send OTP</button>
+      </div>
+
+      <div class="otp-sent" *ngIf="otpSent">
+        <mat-form-field appearance="outline">
+          <mat-label>Enter OTP</mat-label>
+          <input type="text" matInput formControlName="otp" />
+        </mat-form-field>
+      </div>
+
+      <div class="otp-valid" *ngIf="otpSent">
+        <button mat-raised-button color="primary" type="button" (click)="validateOtp()" [disabled]="!otp?.valid">Validate OTP</button>
+      </div>
+
+      <!-- <div *ngIf="otpValid">
+        <p>OTP is valid! You can proceed with sign-up.</p>
+      </div> -->
+
       <div class="role-wrapper">
         <mat-form-field appearance="outline">
           <mat-label>Role</mat-label>
@@ -37,7 +56,7 @@
             <mat-option value="Manager">manager</mat-option>
             <mat-option value="Employee">employee</mat-option>
           </mat-select>
-          <mat-error *ngIf="signUpForm.get('role')?.hasError('required')">Role is required</mat-error>
+          <mat-error *ngIf="signUpForm.get('rolename')?.hasError('required')">Role is required</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Location</mat-label>
@@ -65,7 +84,6 @@
         </div>
       </div>
 
-
       <div class="input-group">
         <mat-form-field appearance="outline">
           <mat-label>Date of Birth</mat-label>
@@ -76,12 +94,12 @@
         </mat-form-field>
       </div>
 
-      <div>
+      <!-- <div class="check">
         <mat-checkbox formControlName="terms">I accept the terms and conditions</mat-checkbox>
         <mat-error *ngIf="signUpForm.get('terms')?.hasError('required')">You must accept the terms and conditions</mat-error>
-      </div>
+      </div> -->
 
-      <button mat-flat-button color="primary" type="submit" [disabled]="signUpForm.invalid">Register</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="signUpForm.invalid || !otpValid">Register</button>
     </form>
   </div>
 </div>

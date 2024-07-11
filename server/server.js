@@ -6,6 +6,8 @@ const prisma = new PrismaClient();
 import cors from 'cors';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+
 dotenv.config();
 
 
@@ -56,7 +58,55 @@ async function sendEmail(to, subject, text) {
   }
 }
 
+// In-memory store for OTPs
+const otpStore = {};
 
+// Generate a random OTP
+function generateOtp() {
+  return crypto.randomBytes(3).toString('hex'); // Generates a 6-character hex string
+}
+
+// Send OTP route
+app.post('/send-otp', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  const otp = generateOtp();
+  otpStore[email] = { otp, expiresAt: Date.now() + 15 * 60 * 1000 };
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: 'Your OTP Code',
+    text: `Your OTP code is ${otp}`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'OTP sent successfully' });
+  } catch (error) {
+    console.error('Error sending OTP', error);
+    res.status(500).json({ error: 'Failed to send OTP' });
+  }
+});
+
+// Validate OTP route
+app.post('/validate-otp', (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ error: 'Email and OTP are required' });
+  }
+
+  const storedOtp = otpStore[email];
+  if (storedOtp && storedOtp === otp) {
+    delete otpStore[email]; // Remove OTP after validation
+    return res.status(200).json({ valid: true });
+  }
+
+  res.status(400).json({ valid: false, error: 'Invalid OTP' });
+});
 
 
 async function createEmployee(data) {

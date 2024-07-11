@@ -48,6 +48,7 @@
     display: flex;
     justify-content: space-between;
     gap: 10px;
+    margin-top: 15px;
 }
 
 .log-in-btn {
@@ -95,7 +96,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: -5px;
   }
   
   .country-code {
@@ -112,3 +113,18 @@
     margin-top: 10px;
   }
   
+  .sent{
+    margin-top: -13px;
+  }
+
+  .otp-sent{
+    margin-top: 10px;
+  }
+
+  .otp-valid{
+    margin-top: -17px;
+  }
+
+  .check{
+    margin-top: -10px;
+  }
