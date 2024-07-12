@@ -74,7 +74,7 @@ app.post('/send-otp', async (req, res) => {
   }
 
   const otp = generateOtp();
-  otpStore[email] = { otp, expiresAt: Date.now() + 15 * 60 * 1000 };
+  otpStore[email] = otp;
 
   const mailOptions = {
     from: process.env.EMAIL,

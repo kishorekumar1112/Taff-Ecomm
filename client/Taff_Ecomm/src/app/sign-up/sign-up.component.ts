@@ -1,8 +1,19 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { UserService } from '../../services/users.service';
 import { OtpValidationService } from '../../services/otp-validation.service';
+
+export function phoneNumberLengthValidator(maxLength: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (value && value.length > maxLength) {
+      return { maxLengthExceeded: true };
+    }
+    return null;
+  };
+}
 
 @Component({
   selector: 'app-sign-up',
@@ -20,22 +31,18 @@ export class SignUpComponent {
     private fb: FormBuilder,
     private userService: UserService,
     private snackBar: MatSnackBar,
-    private otpService: OtpValidationService
+    private otpService: OtpValidationService,
+    private router: Router
   ) {
     this.signUpForm = this.fb.group({
-      // userId : ['', [Validators.required]],
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       rolename: ['', [Validators.required]],
       location: ['', [Validators.required]],
-      // password: ['', [Validators.required, Validators.minLength(6)]],
-      // confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
-      phoneNumber: ['', Validators.required],
+      phoneNumber: ['', [Validators.required, phoneNumberLengthValidator(10)]],
       countryCode: ['', Validators.required],
       dob: ['', Validators.required],
-      // dateOfJoining: [{ value: new Date(), disabled: true }],
-      // terms: [false, [Validators.requiredTrue]],
       otp: ['']
     });
 
@@ -115,14 +122,14 @@ export class SignUpComponent {
     if (this.signUpForm.valid && this.otpValid) {
       const dob = new Date(this.signUpForm.value.dob);
       const age = this.calculateAge(dob);
-      
+
       if (age < 18) {
         this.snackBar.open('Employee must be greater than 18 years.', 'Close', {
-          duration: 3000, // duration in milliseconds
+          duration: 3000,
           verticalPosition: 'top',
           panelClass: ['error-snackbar']
         });
-        return; // Prevent form submission
+        return;
       }
 
       console.log('Form Submitted!', this.signUpForm.value);
@@ -130,14 +137,15 @@ export class SignUpComponent {
       this.userService.registerUser(this.signUpForm.value).subscribe(
         (response: any) => {
           this.snackBar.open('User registered successfully!', 'Close', {
-            duration: 3000, // duration in milliseconds
+            duration: 3000,
             verticalPosition: 'top',
             panelClass: ['success-snackbar']
           });
+          this.router.navigate(['/home'])
         },
         (error: any) => {
           this.snackBar.open('Error registering user. Please try again.', 'Close', {
-            duration: 3000, // duration in milliseconds
+            duration: 3000,
             verticalPosition: 'top',
             panelClass: ['error-snackbar']
           });
