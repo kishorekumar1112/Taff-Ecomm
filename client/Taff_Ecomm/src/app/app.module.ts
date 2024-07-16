@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
-import { ReactiveFormsModule } from '@angular/forms';  // Import ReactiveFormsModule
+import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,19 +12,21 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { RouterModule } from '@angular/router'; // Add this line
+import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
-import { SignUpComponent } from './sign-up/sign-up.component'; // Add this line
+import { SignUpComponent } from './sign-up/sign-up.component';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { HttpClientModule } from '@angular/common/http';
 import { HomeComponent } from './home/home.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     SignUpComponent,
-    HomeComponent
+    HomeComponent,
+    ForgotPasswordComponent
   ],
   imports: [
     BrowserModule,
@@ -41,8 +43,8 @@ import { HomeComponent } from './home/home.component';
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule,
-    RouterModule, // Add this line
-    AppRoutingModule, // Add this line
+    RouterModule,
+    AppRoutingModule,
     HttpClientModule
   ],
   providers: [

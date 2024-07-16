@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class OtpValidationService {
-  private apiUrl = 'http://localhost:3000';  // Replace with your backend API URL
+  private apiUrl = 'http://localhost:3000'; 
 
   constructor(private http: HttpClient) {}
 
@@ -16,6 +16,10 @@ export class OtpValidationService {
 
   validateOtp(email: string, otp: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/validate-otp`, { email, otp });
+  }
+
+  resetPassword(email: string, otp: string, newPassword: string, confirmNewPassword: string ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, { email, otp, newPassword, confirmNewPassword });
   }
 }
 

@@ -72,7 +72,7 @@
     cursor: pointer;
 }
 
-/* For mobile phones */
+
 @media only screen and (max-width: 768px) {
     .input-group {
         flex-direction: column;

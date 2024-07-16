@@ -1,8 +1,28 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/users.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+
+export function userNameLengthValidator(maxLength: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (value && value.length > maxLength) {
+      return { maxLengthExceeded: true };
+    }
+    return null;
+  };
+}
+
+export function passwordLengthValidator(maxLength: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (value && value.length > maxLength) {
+      return { maxLengthExceeded: true };
+    }
+    return null;
+  };
+}
 
 
 @Component({
@@ -18,8 +38,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      username: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      username: ['', [Validators.required, Validators.minLength(8), userNameLengthValidator(30)]],
+      password: ['', [Validators.required, Validators.minLength(6), passwordLengthValidator(25)]],
       // recaptcha: [null, Validators.required] // Assuming recaptcha is required
     });
   }
@@ -39,14 +59,13 @@ export class LoginComponent implements OnInit {
         },
        (error: any) => {
         this.snackBar.open('Login Failed!. Invalid Username or Password', 'Close', {
-          duration: 3000, // duration in milliseconds
+          duration: 3000,
           verticalPosition: 'top',
           horizontalPosition: 'center',
           panelClass: ['error-snackbar']
         });
       }
       );} else {
-      // Mark all fields as touched to display validation messages
       this.loginForm.markAllAsTouched();
     }
   }
