@@ -7,6 +7,8 @@ import cors from 'cors';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser"
 
 dotenv.config();
 
@@ -15,6 +17,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -287,6 +290,7 @@ async function createEmployee(data) {
 
 
 
+//Login API
 app.post('/login', async(req,res)=>{
   const {username, password} = req.body;
 
@@ -297,23 +301,27 @@ app.post('/login', async(req,res)=>{
       }
     })
   
+    //If user not found
     if(!user){
       return res.status(404).json({message: "User not found!" })
     }
   
-
+    //compare the password
     const passwordMatch = await bcrypt.compare(password, user.password);
   
     if(!passwordMatch){
       return res.status(404).json({message: "Invalid password"})
     }
-
-    res.status(200).json({ message: "Login successfully..." });
+    const token = jwt.sign({username: user.username}, process.env.TOKEN_KEY, {expiresIn: '1h' });
+    res.cookie('token', token, {httpOnly: true});
+    return res.status(200).json({ message: "Login successfully..." });
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 })
+console.log('jwt toke:'.token);
+
 
 app.post('/create-employee', async (req, res) => {
   try {
@@ -380,6 +388,18 @@ app.get('/employee-credentials/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+//Fetch user role from MySQL database
+app.get('/roles', async(req, res)=>{
+  try{
+    const roles = await prisma.role.findMany();
+    res.status(201).json(roles)
+  }catch(error){
+    console.error("Error in retrieving roles", error)
+    res.status(500).json({message: "Internal server error"})
+  }
+})
 
 const PORT = 3000;
 app.listen(PORT, () => {
