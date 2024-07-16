@@ -32,25 +32,25 @@ function calculateAge(dob) {
 
   return age;
 }
-// Create a transporter object using SMTP transport
+
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com', // Replace with your SMTP host
-  port: 587, // Replace with your SMTP port
-  secure: false, // true for 465, false for other ports
+  host: 'smtp.gmail.com', 
+  port: 587,
+  secure: false, 
   auth: {
-    user:  process.env.EMAIL, // Replace with your SMTP username
-    pass: process.env.EMAIL_PASSWORD, // Replace with your SMTP password
+    user:  process.env.EMAIL, 
+    pass: process.env.EMAIL_PASSWORD, 
   },
 });
 
-//Function to send email
+
 async function sendEmail(to, subject, text) {
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL, // Replace with your "from" address
-      to, // List of receivers
+      from: process.env.EMAIL, 
+      to, 
       subject, 
-      text, // Plain text body   
+      text,    
     });
     console.log('Email sent successfully');
   } catch (error) {
@@ -58,15 +58,15 @@ async function sendEmail(to, subject, text) {
   }
 }
 
-// In-memory store for OTPs
+
 const otpStore = {};
 
-// Generate a random OTP
+
 function generateOtp() {
-  return crypto.randomBytes(3).toString('hex'); // Generates a 6-character hex string
+  return crypto.randomBytes(3).toString('hex'); 
 }
 
-// Send OTP route
+
 app.post('/send-otp', async (req, res) => {
   const { email } = req.body;
   if (!email) {
@@ -92,7 +92,7 @@ app.post('/send-otp', async (req, res) => {
   }
 });
 
-// Validate OTP route
+
 app.post('/validate-otp', (req, res) => {
   const { email, otp } = req.body;
   if (!email || !otp) {
@@ -101,13 +101,71 @@ app.post('/validate-otp', (req, res) => {
 
   const storedOtp = otpStore[email];
   if (storedOtp && storedOtp === otp) {
-    delete otpStore[email]; // Remove OTP after validation
+    delete otpStore[email]; 
     return res.status(200).json({ valid: true });
   }
 
   res.status(400).json({ valid: false, error: 'Invalid OTP' });
 });
+app.post('/send-reset-otp', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
 
+  const user = await prisma.employee.findUnique({ where: { email } });
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const otp = generateOtp();
+  otpStore[email] = otp;
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: 'Your Password Reset OTP',
+    text: `Your OTP code is ${otp}`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'OTP sent successfully' });
+  } catch (error) {
+    console.error('Error sending OTP', error);
+    res.status(500).json({ error: 'Failed to send OTP' });
+  }
+});
+
+app.post('/reset-password', async (req, res) => {
+  const { email, otp, newPassword, confirmNewPassword } = req.body;
+  if (!email || !otp || !newPassword || !confirmNewPassword) {
+    return res.status(400).json({ error: 'Email, OTP, new password, and confirm new password are required' });
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    return res.status(400).json({ error: 'New password and confirm password do not match' });
+  }
+
+  const storedOtp = otpStore[email];
+  if (!storedOtp || storedOtp !== otp) {
+    return res.status(400).json({ error: 'Invalid OTP' });
+  }
+
+  try {
+    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+    await prisma.employee.update({
+      where: { email },
+      data: { password: hashedPassword },
+    });
+    delete otpStore[email];
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 async function createEmployee(data) {
   try {
@@ -179,7 +237,7 @@ async function createEmployee(data) {
     data.username = username;
     // data.password= password;
     data.password = bcrypt.hashSync(password, 10);
-
+    const phoneNumberWithCountryCode = `${data.countryCode}-${data.phoneNumber}`;
     const newEmployee = await prisma.employee.create({
       data: {
         firstName: data.firstName,
@@ -187,7 +245,7 @@ async function createEmployee(data) {
         dob: dob,
         email: data.email,
         location: data.location,
-        phoneNumber: data.phoneNumber,
+        phoneNumber:phoneNumberWithCountryCode,
         username: data.username,
         password: data.password,
         roleId: role.id,
@@ -195,7 +253,7 @@ async function createEmployee(data) {
     });
 
     if(newEmployee) {
-       // Send email with username and password
+
       const emailText = `Hello ${data.firstName},
 
       Your account has been created successfully. Here are your credentials:
@@ -227,7 +285,7 @@ async function createEmployee(data) {
 // });
 
 
-//Login API
+
 app.post('/login', async(req,res)=>{
   const {username, password} = req.body;
 
@@ -238,12 +296,11 @@ app.post('/login', async(req,res)=>{
       }
     })
   
-    //If user not found
     if(!user){
       return res.status(404).json({message: "User not found!" })
     }
   
-    //compare the password
+
     const passwordMatch = await bcrypt.compare(password, user.password);
   
     if(!passwordMatch){
@@ -290,17 +347,16 @@ app.delete('/create-employee/:id', async (req, res) => {
   }
 });
 
-// Get employee credentials by ID (username and password only)
+
 app.get('/employee-credentials/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Check if the ID is a valid number
+   
     if (isNaN(parseInt(id, 10))) {
       return res.status(400).json({ error: 'Invalid ID format' });
     }
 
-    // Find the employee by ID
     const employee = await prisma.employee.findUnique({
       where: {
         id: parseInt(id, 10),
@@ -311,12 +367,12 @@ app.get('/employee-credentials/:id', async (req, res) => {
       }
     });
 
-    // If employee not found
+
     if (!employee) {
       return res.status(404).json({ error: 'Employee not found' });
     }
 
-    // Return the username and hashed password
+  
     res.status(200).json({ username: employee.username, password: employee.password });
   } catch (error) {
     console.error('Error retrieving employee credentials:', error);
