@@ -67,6 +67,7 @@ function generateOtp() {
 }
 
 
+
 app.post('/send-otp', async (req, res) => {
   const { email } = req.body;
   if (!email) {
@@ -107,36 +108,36 @@ app.post('/validate-otp', (req, res) => {
 
   res.status(400).json({ valid: false, error: 'Invalid OTP' });
 });
-app.post('/send-reset-otp', async (req, res) => {
-  const { email } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
-  }
+// app.post('/send-reset-otp', async (req, res) => {
+//   const { email } = req.body;
+//   if (!email) {
+//     return res.status(400).json({ error: 'Email is required' });
+//   }
 
-  const user = await prisma.employee.findUnique({ where: { email } });
+//   const user = await prisma.employee.findUnique({ where: { email } });
 
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+//   if (!user) {
+//     return res.status(404).json({ error: 'User not found' });
+//   }
 
-  const otp = generateOtp();
-  otpStore[email] = otp;
+//   const otp = generateOtp();
+//   otpStore[email] = otp;
 
-  const mailOptions = {
-    from: process.env.EMAIL,
-    to: email,
-    subject: 'Your Password Reset OTP',
-    text: `Your OTP code is ${otp}`,
-  };
+//   const mailOptions = {
+//     from: process.env.EMAIL,
+//     to: email,
+//     subject: 'Your Password Reset OTP',
+//     text: `Your OTP code is ${otp}`,
+//   };
 
-  try {
-    await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: 'OTP sent successfully' });
-  } catch (error) {
-    console.error('Error sending OTP', error);
-    res.status(500).json({ error: 'Failed to send OTP' });
-  }
-});
+//   try {
+//     await transporter.sendMail(mailOptions);
+//     res.status(200).json({ message: 'OTP sent successfully' });
+//   } catch (error) {
+//     console.error('Error sending OTP', error);
+//     res.status(500).json({ error: 'Failed to send OTP' });
+//   }
+// });
 
 app.post('/reset-password', async (req, res) => {
   const { email, otp, newPassword, confirmNewPassword } = req.body;
@@ -147,10 +148,10 @@ app.post('/reset-password', async (req, res) => {
   if (newPassword !== confirmNewPassword) {
     return res.status(400).json({ error: 'New password and confirm password do not match' });
   }
-
   const storedOtp = otpStore[email];
-  if (!storedOtp || storedOtp !== otp) {
-    return res.status(400).json({ error: 'Invalid OTP' });
+  if (storedOtp && storedOtp === otp) {
+    delete otpStore[email]; 
+    return res.status(200).json({ valid: true });
   }
 
   try {
