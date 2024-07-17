@@ -49,7 +49,7 @@ export class LoginComponent implements OnInit {
 
       this.userService.loginUser(this.loginForm.value).subscribe(
         (response: any) => {
-          this.snackBar.open('Login Successful', 'Close', {
+          this.snackBar.open('Login Successful', '', {
             duration: 3000,
             verticalPosition: 'top',
             horizontalPosition: 'center',
@@ -58,7 +58,7 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['/sign-up'])
         },
        (error: any) => {
-        this.snackBar.open('Login Failed!. Invalid Username or Password', 'Close', {
+        this.snackBar.open('Login Failed!. Invalid Username or Password', '', {
           duration: 3000,
           verticalPosition: 'top',
           horizontalPosition: 'center',

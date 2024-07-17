@@ -74,29 +74,29 @@ export class ForgotPasswordComponent {
     }
   }
 
-  // resendOtp() {
-  //   const emailValue = this.email?.value;
-  //   if (emailValue) {
-  //     this.otpService.resendOtp(emailValue).subscribe(
-  //       (response: any) => {
-  //         this.otpSent = true;
-  //         this.snackBar.open('OTP sent successfully. Check your email.', '', {
-  //           duration: 3000,
-  //           verticalPosition: 'top',
-  //           panelClass: ['success-snackbar']
-  //         });
-  //       },
-  //       (error: any) => {
-  //         console.error('Error sending OTP', error);
-  //         this.snackBar.open('Error sending OTP. Please try again later.', '', {
-  //           duration: 3000,
-  //           verticalPosition: 'top',
-  //           panelClass: ['error-snackbar']
-  //         });
-  //       }
-  //     );
-  //   }
-  // }
+  resendOtp() {
+    const emailValue = this.email?.value;
+    if (emailValue) {
+      this.otpService.resendOtp(emailValue).subscribe(
+        (response: any) => {
+          this.otpSent = true;
+          this.snackBar.open('OTP sent successfully. Check your email.', '', {
+            duration: 3000,
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
+        },
+        (error: any) => {
+          console.error('Error sending OTP', error);
+          this.snackBar.open('User not found.', '', {
+            duration: 3000,
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
+        }
+      );
+    }
+  }
 
   validateOtp() {
     const emailValue = this.email?.value;

@@ -14,6 +14,10 @@ export class OtpValidationService {
     return this.http.post(`${this.apiUrl}/send-otp`, { email });
   }
 
+  resendOtp(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/send-reset-otp`, { email })
+  }
+
   validateOtp(email: string, otp: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/validate-otp`, { email, otp });
   }
