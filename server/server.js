@@ -394,7 +394,7 @@ app.get('/employee-credentials/:id', async (req, res) => {
 app.get('/roles', async(req, res)=>{
   try{
     const roles = await prisma.role.findMany();
-    res.status(201).json(roles)
+    res.status(200).json(roles)
   }catch(error){
     console.error("Error in retrieving roles", error)
     res.status(500).json({message: "Internal server error"})
