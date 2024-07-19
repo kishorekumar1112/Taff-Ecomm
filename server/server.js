@@ -112,38 +112,51 @@ app.post('/validate-otp', (req, res) => {
   res.status(400).json({ valid: false, error: 'Invalid OTP' });
 });
 app.post('/send-reset-otp', async (req, res) => {
-  const { email } = req.body;
+  const { email, username } = req.body;
+
   if (!email) {
     return res.status(400).json({ error: 'Email is required' });
   }
 
-  const user = await prisma.employee.findUnique({ where: { email } });
-
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
-  const otp = generateOtp();
-  otpStore[email] = otp;
-
-  const mailOptions = {
-    from: process.env.EMAIL,
-    to: email,
-    subject: 'Your OTP Code',
-    text: `Your OTP code is ${otp}`,
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: 'OTP sent successfully' });
+    const user = await prisma.employee.findFirst({
+      where: {
+        AND: [
+          { username: username },
+          { email: email }
+        ]
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'username or email does not exist' });
+    }
+
+    const otp = generateOtp();
+    otpStore[email] = otp;
+
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: 'Your OTP Code',
+      text: `Your OTP code is ${otp}`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({ message: 'OTP sent successfully' });
+    } catch (error) {
+      console.error('Error sending OTP', error);
+      res.status(500).json({ error: 'Failed to send OTP' });
+    }
   } catch (error) {
-    console.error('Error sending OTP', error);
-    res.status(500).json({ error: 'Failed to send OTP' });
+    console.error('Error finding user:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.post('/reset-password', async (req, res) => {
-  const { email, otp, newPassword, confirmNewPassword } = req.body;
+  const {otp, newPassword, confirmNewPassword } = req.body;
   if (!email || !otp || !newPassword || !confirmNewPassword) {
     return res.status(400).json({ error: 'Email, OTP, new password, and confirm new password are required' });
   }
@@ -287,8 +300,23 @@ async function createEmployee(data) {
 //     res.status(500).json({ error: error.message });
 //   }
 // });
+app.post('/username', async (req, res) => {
+  const { username } = req.body;
 
+  try {
+    const user = await prisma.employee.findUnique({
+      where: {
+        username: username,
+      },
+    });
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+  } catch (error) {
+    console.error('Error retrieving user:', error);
+  }
+});
 
 //Login API
 app.post('/login', async(req,res)=>{
@@ -320,7 +348,7 @@ app.post('/login', async(req,res)=>{
     res.status(500).json({ error: 'Internal server error' });
   }
 })
-console.log('jwt toke:'.token);
+// console.log('jwt toke:'.token);
 
 
 app.post('/create-employee', async (req, res) => {
@@ -332,15 +360,6 @@ app.post('/create-employee', async (req, res) => {
   }
 });
 
-app.get('/create-employee', async (req, res) => {
-  try {
-    const employees = await prisma.employee.findMany();
-    res.status(200).json(employees);
-  } catch (error) {
-    console.error("Error retrieving employees:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
 app.delete('/create-employee/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -400,6 +419,23 @@ app.get('/roles', async(req, res)=>{
     res.status(500).json({message: "Internal server error"})
   }
 })
+app.get('/email/:username', async (req, res) => {
+  try {
+    const user = await prisma.employee.findUnique({
+      where: {
+        username: req.params.username
+      }
+    });
+    if (user) {
+      res.status(200).json({ email: user.email });
+    } else {
+      res.status(404).json({ message: 'Username not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 const PORT = 3000;
 app.listen(PORT, () => {
