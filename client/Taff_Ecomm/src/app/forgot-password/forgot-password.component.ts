@@ -143,10 +143,10 @@ export class ForgotPasswordComponent implements OnInit {
 
   resetPassword(): void {
     const emailValue = this.forgotPasswordForm.get('email')?.value;
-    const otpValue = this.forgotPasswordForm.get('otp')?.value;
+    // const otpValue = this.forgotPasswordForm.get('otp')?.value;
     const newPassword = this.forgotPasswordForm.get('newPassword')?.value;
     const confirmNewPassword = this.forgotPasswordForm.get('confirmNewPassword')?.value;
-    const username = this.forgotPasswordForm.get('username')?.value;
+    // const username = this.forgotPasswordForm.get('username')?.value;
 
     if (newPassword !== confirmNewPassword) {
       this.snackBar.open('Passwords do not match.', '', {
@@ -157,8 +157,8 @@ export class ForgotPasswordComponent implements OnInit {
       return;
     }
 
-    if (emailValue && otpValue && newPassword && confirmNewPassword) {
-      this.otpService.resetPassword(emailValue, otpValue, newPassword, confirmNewPassword, username).subscribe(
+    if (emailValue && newPassword && confirmNewPassword) {
+      this.otpService.resetPassword(emailValue, newPassword, confirmNewPassword).subscribe(
         (response: any) => {
           this.snackBar.open('Password reset successfully.', '', {
             duration: 3000,

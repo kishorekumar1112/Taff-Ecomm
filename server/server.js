@@ -157,8 +157,8 @@ app.post('/send-reset-otp', async (req, res) => {
 });
 
 app.post('/reset-password', async (req, res) => {
-  const {email,otp, newPassword, confirmNewPassword } = req.body;
-  if (!email|| !otp || !newPassword || !confirmNewPassword) {
+  const {email,newPassword, confirmNewPassword } = req.body;
+  if (!email||!newPassword || !confirmNewPassword) {
     return res.status(400).json({ error: 'Email, OTP, new password, and confirm new password are required' });
   }
 
@@ -177,7 +177,7 @@ app.post('/reset-password', async (req, res) => {
       where: { email },
       data: { password: hashedPassword },
     });
-    delete otpStore[email];
+    // delete otpStore[email];
     res.status(200).json({ message: 'Password reset successfully' });
   } catch (error) {
     console.error('Error resetting password:', error);
