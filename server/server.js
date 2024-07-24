@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser"
 
+
 dotenv.config();
 
 
@@ -156,19 +157,19 @@ app.post('/send-reset-otp', async (req, res) => {
 });
 
 app.post('/reset-password', async (req, res) => {
-  const {otp, newPassword, confirmNewPassword } = req.body;
-  if (!email || !otp || !newPassword || !confirmNewPassword) {
+  const {email,otp, newPassword, confirmNewPassword } = req.body;
+  if (!email|| !otp || !newPassword || !confirmNewPassword) {
     return res.status(400).json({ error: 'Email, OTP, new password, and confirm new password are required' });
   }
 
   if (newPassword !== confirmNewPassword) {
     return res.status(400).json({ error: 'New password and confirm password do not match' });
   }
-  const storedOtp = otpStore[email];
-  if (storedOtp && storedOtp === otp) {
-    delete otpStore[email]; 
-    return res.status(200).json({ valid: true });
-  }
+  // const storedOtp = otpStore[email];
+  // if (storedOtp && storedOtp === otp) {
+  //   delete otpStore[email]; 
+  //   return res.status(200).json({ valid: true });
+  // }
 
   try {
     const hashedPassword = bcrypt.hashSync(newPassword, 10);
