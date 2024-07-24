@@ -18,6 +18,10 @@ export class UserService {
   loginUser(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, userData);
   }
+
+  getUserEmailByUsername(username: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/email/${username}`)
+  }
   
 
 }

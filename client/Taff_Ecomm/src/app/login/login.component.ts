@@ -24,7 +24,6 @@ export function passwordLengthValidator(maxLength: number): ValidatorFn {
   };
 }
 
-
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -32,9 +31,13 @@ export function passwordLengthValidator(maxLength: number): ValidatorFn {
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
-  UserService: any;
 
-  constructor(private fb: FormBuilder, private router: Router, private userService: UserService, private snackBar: MatSnackBar) {}
+  constructor(
+    private fb: FormBuilder, 
+    private router: Router, 
+    private userService: UserService, 
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -46,7 +49,6 @@ export class LoginComponent implements OnInit {
 
   onSubmit(): void {
     if (this.loginForm.valid) {
-
       this.userService.loginUser(this.loginForm.value).subscribe(
         (response: any) => {
           this.snackBar.open('Login Successful', '', {
@@ -55,18 +57,24 @@ export class LoginComponent implements OnInit {
             horizontalPosition: 'center',
             panelClass: ['success-snackbar']
           });
-          this.router.navigate(['/sign-up'])
+          this.router.navigate(['/sign-up']);
         },
-       (error: any) => {
-        this.snackBar.open('Login Failed!. Invalid Username or Password', '', {
-          duration: 3000,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
-          panelClass: ['error-snackbar']
-        });
-      }
-      );} else {
+        (error: any) => {
+          this.snackBar.open('Login Failed! Invalid Username or Password', '', {
+            duration: 3000,
+            verticalPosition: 'top',
+            horizontalPosition: 'center',
+            panelClass: ['error-snackbar']
+          });
+        }
+      );
+    } else {
       this.loginForm.markAllAsTouched();
     }
+  }
+
+  onForgotPassword(): void {
+    const username = this.loginForm.get('username')?.value;
+    this.router.navigate(['/forgot-password'], { queryParams: { username } });
   }
 }

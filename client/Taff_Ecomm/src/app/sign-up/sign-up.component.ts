@@ -49,6 +49,7 @@ export class SignUpComponent implements OnInit {
       countryCode: ['', Validators.required],
       dob: ['', Validators.required],
       otp: [''],
+    
     });
 
     this.maxDate = new Date();
