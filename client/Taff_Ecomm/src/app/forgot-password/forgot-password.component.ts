@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { UserService } from '../../services/users.service';
 import { OtpValidationService } from '../../services/otp-validation.service';
 
 @Component({
@@ -9,16 +10,23 @@ import { OtpValidationService } from '../../services/otp-validation.service';
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.css']
 })
-export class ForgotPasswordComponent {
+export class ForgotPasswordComponent implements OnInit {
 
   forgotPasswordForm: FormGroup;
-  isEmailEntered = false;
   hidePassword = true;
   otpSent = false;
   otpValid = false;
 
-  constructor(private fb: FormBuilder, private snackBar: MatSnackBar, private router: Router, private otpService: OtpValidationService) {
+  constructor(
+    private fb: FormBuilder, 
+    private snackBar: MatSnackBar, 
+    private router: Router, 
+    private route: ActivatedRoute, 
+    private userService: UserService, 
+    private otpService: OtpValidationService
+  ) {
     this.forgotPasswordForm = this.fb.group({
+      username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       newPassword: ['', [Validators.required, Validators.minLength(6)]],
       confirmNewPassword: ['', Validators.required],
@@ -26,32 +34,33 @@ export class ForgotPasswordComponent {
     });
   }
 
-  get f() {
-    return this.forgotPasswordForm.controls;
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const username = params['username'];
+      if (username) {
+        this.forgotPasswordForm.get('username')?.setValue(username);
+        this.fetchEmail(username);
+      }
+    });
   }
 
-  get email() {
-    return this.forgotPasswordForm.get('email');
+  fetchEmail(username: string): void {
+    this.userService.getUserEmailByUsername(username).subscribe(
+      (response: any) => {
+        this.forgotPasswordForm.get('email')?.setValue(response.email);
+      },
+      (error: any) => {
+        this.snackBar.open('Username not found', '', {
+          duration: 3000,
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    );
   }
 
-  get otp() {
-    return this.forgotPasswordForm.get('otp');
-  }
-
-  togglePasswordVisibility() {
-    this.hidePassword = !this.hidePassword;
-  }
-
-  // sendOrResendOtp() {
-  //   if (this.otpSent) {
-  //     this.resendOtp();
-  //   } else {
-  //     this.sendOtp();
-  //   }
-  // }
-
-  sendOtp() {
-    const emailValue = this.email?.value;
+  sendOtp(): void {
+    const emailValue = this.forgotPasswordForm.get('email')?.value;
     if (emailValue) {
       this.otpService.sendOtp(emailValue).subscribe(
         (response: any) => {
@@ -75,7 +84,7 @@ export class ForgotPasswordComponent {
   }
 
   resendOtp() {
-    const emailValue = this.email?.value;
+    const emailValue = this.forgotPasswordForm.get('email')?.value;
     if (emailValue) {
       this.otpService.resendOtp(emailValue).subscribe(
         (response: any) => {
@@ -98,9 +107,10 @@ export class ForgotPasswordComponent {
     }
   }
 
-  validateOtp() {
-    const emailValue = this.email?.value;
-    const otpValue = this.otp?.value;
+
+  validateOtp(): void {
+    const emailValue = this.forgotPasswordForm.get('email')?.value;
+    const otpValue = this.forgotPasswordForm.get('otp')?.value;
     if (emailValue && otpValue) {
       this.otpService.validateOtp(emailValue, otpValue).subscribe(
         (response: any) => {
@@ -131,14 +141,24 @@ export class ForgotPasswordComponent {
     }
   }
 
-  resetPassword() {
-    const emailValue = this.email?.value;
-    const otpValue = this.otp?.value;
+  resetPassword(): void {
+    const emailValue = this.forgotPasswordForm.get('email')?.value;
+    const otpValue = this.forgotPasswordForm.get('otp')?.value;
     const newPassword = this.forgotPasswordForm.get('newPassword')?.value;
     const confirmNewPassword = this.forgotPasswordForm.get('confirmNewPassword')?.value;
+    const username = this.forgotPasswordForm.get('username')?.value;
+
+    if (newPassword !== confirmNewPassword) {
+      this.snackBar.open('Passwords do not match.', '', {
+        duration: 3000,
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
 
     if (emailValue && otpValue && newPassword && confirmNewPassword) {
-      this.otpService.resetPassword(emailValue, otpValue, newPassword, confirmNewPassword).subscribe(
+      this.otpService.resetPassword(emailValue, otpValue, newPassword, confirmNewPassword, username).subscribe(
         (response: any) => {
           this.snackBar.open('Password reset successfully.', '', {
             duration: 3000,
@@ -159,12 +179,15 @@ export class ForgotPasswordComponent {
     }
   }
 
-
-  onSubmit() {
+  onSubmit(): void {
     if (this.forgotPasswordForm.valid && this.otpValid) {
       this.resetPassword();
-      
+    } else {
+      this.forgotPasswordForm.markAllAsTouched();
     }
   }
 
+  togglePasswordVisibility(): void {
+    this.hidePassword = !this.hidePassword;
+  }
 }

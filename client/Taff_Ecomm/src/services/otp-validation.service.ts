@@ -22,8 +22,8 @@ export class OtpValidationService {
     return this.http.post(`${this.apiUrl}/validate-otp`, { email, otp });
   }
 
-  resetPassword(email: string, otp: string, newPassword: string, confirmNewPassword: string ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/reset-password`, { email, otp, newPassword, confirmNewPassword });
+  resetPassword(email: string,username:string,otp: string, newPassword: string, confirmNewPassword: string ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, { email, username,otp, newPassword, confirmNewPassword });
   }
 }
 
