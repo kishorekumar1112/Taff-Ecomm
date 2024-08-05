@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn,
+} from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/users.service';
@@ -20,7 +27,7 @@ export function phoneNumberLengthValidator(maxLength: number): ValidatorFn {
 @Component({
   selector: 'app-sign-up',
   templateUrl: './sign-up.component.html',
-  styleUrls: ['./sign-up.component.css']
+  styleUrls: ['./sign-up.component.css'],
 })
 export class SignUpComponent implements OnInit {
   signUpForm: FormGroup;
@@ -35,7 +42,7 @@ export class SignUpComponent implements OnInit {
     private userService: UserService,
     private snackBar: MatSnackBar,
     private otpService: OtpValidationService,
-    private countryCodeService : countryCodeService,
+    private countryCodeService: countryCodeService,
     private router: Router,
     private http: HttpClient
   ) {
@@ -49,7 +56,6 @@ export class SignUpComponent implements OnInit {
       countryCode: ['', Validators.required],
       dob: ['', Validators.required],
       otp: [''],
-    
     });
 
     this.maxDate = new Date();
@@ -62,10 +68,10 @@ export class SignUpComponent implements OnInit {
 
   fetchRoles(): void {
     this.http.get<any[]>('http://localhost:3000/roles').subscribe(
-      data => {
+      (data: any) => {
         this.roles = data;
       },
-      error => {
+      (error: any) => {
         console.error('Error fetching roles:', error);
       }
     );
@@ -73,15 +79,33 @@ export class SignUpComponent implements OnInit {
 
   fetchCountryCodes(): void {
     this.countryCodeService.getCountryCodes().subscribe(
-      data => {
+      (data: any) => {
         this.countryCodes = data
           .filter((country: any) => country.idd && country.idd.root)
           .map((country: any) => ({
             country: country.name.common,
-            code: `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`
+            code: `${country.idd.root}${
+              country.idd.suffixes ? country.idd.suffixes[0] : ''
+            }`,
           }));
+
+        const india = this.countryCodes.find((c) => c.country === 'India');
+        const america = this.countryCodes.find(
+          (c) => c.country === 'United States'
+        );
+
+        this.countryCodes = this.countryCodes.filter(
+          (c) => c.country !== 'India' && c.country !== 'United States'
+        );
+
+        if (india) {
+          this.countryCodes.unshift(india);
+        }
+        if (america) {
+          this.countryCodes.unshift(america);
+        }
       },
-      error => {
+      (error: any) => {
         console.error('Error fetching country codes', error);
       }
     );
@@ -108,7 +132,7 @@ export class SignUpComponent implements OnInit {
           this.snackBar.open('OTP sent successfully. Check your email.', '', {
             duration: 3000,
             verticalPosition: 'top',
-            panelClass: ['success-snackbar']
+            panelClass: ['success-snackbar'],
           });
         },
         (error: any) => {
@@ -116,7 +140,7 @@ export class SignUpComponent implements OnInit {
           this.snackBar.open('Error sending OTP. Please try again later.', '', {
             duration: 3000,
             verticalPosition: 'top',
-            panelClass: ['error-snackbar']
+            panelClass: ['error-snackbar'],
           });
         }
       );
@@ -131,16 +155,20 @@ export class SignUpComponent implements OnInit {
         (response: any) => {
           this.otpValid = response.valid;
           if (this.otpValid) {
-            this.snackBar.open('OTP is valid! You can proceed with sign-up.', '', {
-              duration: 3000,
-              verticalPosition: 'top',
-              panelClass: ['success-snackbar']
-            });
+            this.snackBar.open(
+              'OTP is valid! You can proceed with sign-up.',
+              '',
+              {
+                duration: 3000,
+                verticalPosition: 'top',
+                panelClass: ['success-snackbar'],
+              }
+            );
           } else {
             this.snackBar.open('Invalid OTP. Please try again.', '', {
               duration: 3000,
               verticalPosition: 'top',
-              panelClass: ['error-snackbar']
+              panelClass: ['error-snackbar'],
             });
           }
         },
@@ -149,7 +177,7 @@ export class SignUpComponent implements OnInit {
           this.snackBar.open('Invalid OTP. Please try again.', '', {
             duration: 3000,
             verticalPosition: 'top',
-            panelClass: ['error-snackbar']
+            panelClass: ['error-snackbar'],
           });
         }
       );
@@ -165,7 +193,7 @@ export class SignUpComponent implements OnInit {
         this.snackBar.open('Employee must be greater than 18 years.', '', {
           duration: 3000,
           verticalPosition: 'top',
-          panelClass: ['error-snackbar']
+          panelClass: ['error-snackbar'],
         });
         return;
       }
@@ -177,15 +205,15 @@ export class SignUpComponent implements OnInit {
           this.snackBar.open('User registered successfully!', '', {
             duration: 3000,
             verticalPosition: 'top',
-            panelClass: ['success-snackbar']
+            panelClass: ['success-snackbar'],
           });
-          this.router.navigate(['/home'])
+          this.router.navigate(['/home']);
         },
         (error: any) => {
           this.snackBar.open('Error registering user. Please try again.', '', {
             duration: 3000,
             verticalPosition: 'top',
-            panelClass: ['error-snackbar']
+            panelClass: ['error-snackbar'],
           });
         }
       );
